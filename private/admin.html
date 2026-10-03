@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RizzByJulius Admin</title>
+<style>:root{--bg:#0d0d12;--card:#17171f;--line:#2a2a36;--tx:#f3f3f7;--mu:#9a9aae;--ac:#ff4d6d}
+@media (prefers-color-scheme:light){:root{--bg:#f6f6f9;--card:#fff;--line:#e2e2ea;--tx:#15151c;--mu:#6b6b7e}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,sans-serif}main{max-width:720px;margin:0 auto;padding:16px}
+h1{margin:0 0 4px}h2{font-size:16px;margin:20px 0 8px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+.r{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}small{color:var(--mu)}
+input,select{width:100%;background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;margin-bottom:8px}
+button{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 14px;cursor:pointer}button.p{background:var(--ac);border:0;color:#fff}button.d{color:#f87171;border-color:#f87171}a{color:var(--ac)}.ok{color:#34d399}.tabs{display:flex;gap:6px;margin-bottom:12px}.tabs a{flex:1;text-align:center;padding:10px;border:1px solid var(--line);border-radius:999px;text-decoration:none;color:var(--tx);background:var(--card)}.tabs a.on{background:var(--ac);color:#fff;border-color:transparent}.hide{display:none!important}.er{color:#f87171}</style></head><body><main>
+<div class="tabs"><a class="on" href="#">Admin panel</a><a href="/">Use website</a></div>
+<div class="r"><h1>Admin</h1></div><small id="plan"></small>
+<h2>Dashboard</h2><div class="card" id="dash"></div><div id="expSoon"></div>
+<div class="card"><div class="r"><b id="pendTxt">Payments</b><button id="enableAlerts">Enable alerts</button></div></div>
+<h2>Payment number</h2><form class="card" id="payForm"><input id="payNum" placeholder="Airtel number users pay to" inputmode="tel"><button class="p" type="submit">Save number</button><p id="payMsg" style="margin:8px 0 0"></p><small id="payBy"></small></form>
+<h2>Amount users pay (UGX)</h2><form class="card" id="priceForm"><input id="priceIn" type="number" min="500" inputmode="numeric" placeholder="e.g. 3000"><button class="p" type="submit">Save amount</button><p id="priceMsg" style="margin:8px 0 0"></p></form>
+<h2>WhatsApp contact (shown on the home page)</h2><form class="card" id="waForm"><input id="waIn" placeholder="+256741829090" inputmode="tel"><button class="p" type="submit">Save WhatsApp number</button><p id="waMsg" style="margin:8px 0 0"></p></form>
+<h2>Announcement banner (shown to everyone)</h2><form class="card" id="anForm"><input id="anIn" maxlength="200" placeholder="e.g. New feature today! (leave empty to hide)"><button class="p" type="submit">Post announcement</button><p id="anMsg" style="margin:8px 0 0"></p></form>
+<h2>Add member</h2><form class="card" id="add"><input id="nm" placeholder="Name" autocomplete="off"><input id="ph" placeholder="Phone number used on the website" inputmode="tel"><input id="days" type="number" min="1" max="3650" placeholder="Access days (leave empty for no expiry)"><button class="p" type="submit">Add member</button><p id="msg" style="margin:8px 0 0"></p></form>
+<div id="pend"></div>
+<form class="card hide" id="addAdm"><b>Add admin</b> <small>(owner only)</small><input id="ap" placeholder="Phone number" inputmode="tel"><input id="au" placeholder="Username" autocapitalize="none"><input id="aw" type="text" placeholder="Password (8+ characters)" autocomplete="off"><button class="p" type="submit">Add admin</button><p id="amsg" style="margin:8px 0 0"></p></form>
+<h2>Payments</h2><div id="pay"></div><h2>Users <small id="cnt"></small></h2><input id="q" type="search" placeholder="Search by name or phone number"><div id="usr"></div></main>
+<script>
+const $=id=>document.getElementById(id),esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const call=(u,m,b)=>fetch(u,{method:m||"GET",headers:{"Content-Type":"application/json"},body:b?JSON.stringify(b):undefined}).then(async r=>({ok:r.ok,status:r.status,j:await r.json().catch(()=>({}))}));
+const d=t=>new Date(t).toLocaleString();let O={},lastPend=null;
+async function load(){const r=await call("/api/admin/overview");if(!r.ok){location.href="/";return}const j=O=r.j;
+const na=j.users.filter(u=>u.role==="admin").length;
+$("payNum").value!==undefined&&document.activeElement!==$("payNum")&&($("payNum").value=j.payNumber||"");$("payBy").textContent=j.payBy?"Last changed by "+j.payBy:"";
+const st=j.stats||{};$("dash").innerHTML=`<div class="r" style="gap:12px"><div><b>${st.users}</b><br><small>users</small></div><div><b>${st.newWeek}</b><br><small>new (7 days)</small></div><div><b>${st.active}</b><br><small>active plans</small></div><div><b>${st.freeUsed}</b><br><small>free uses</small></div></div><hr style="border:0;border-top:1px solid var(--line);margin:10px 0"><div class="r" style="gap:12px"><div><b>${(st.paidTotal||0).toLocaleString()} UGX</b><br><small>collected total</small></div><div><b>${(st.paidWeek||0).toLocaleString()} UGX</b><br><small>last 7 days</small></div><div><b>${st.paidCount}</b><br><small>payments</small></div></div>`;
+$("expSoon").innerHTML=(j.expiring||[]).length?`<h2>Expiring soon</h2>`+j.expiring.map(u=>`<div class="card r"><div><b>${esc(u.username)}</b> · ${esc(u.phone||"")}<br><small>ends ${d(u.sub_until)}</small></div><a href="https://wa.me/256${esc(String(u.phone||"").slice(1))}?text=${encodeURIComponent("Hi "+u.username+", your RizzByJulius access ends soon. Open the app to renew and keep going.")}" target="_blank" rel="noopener">Remind on WhatsApp</a></div>`).join(""):"";
+document.activeElement!==$("anIn")&&($("anIn").value=j.announcement||"");
+document.activeElement!==$("priceIn")&&($("priceIn").value=j.plan.price);document.activeElement!==$("waIn")&&($("waIn").value="+"+(j.whatsapp||""));
+const pend=j.payments.filter(p=>p.status==="pending");$("pendTxt").textContent=pend.length?`🔔 ${pend.length} payment${pend.length>1?"s":""} waiting for approval`:"No payments waiting";document.title=(pend.length?`(${pend.length}) `:"")+"Admin";
+if(lastPend!==null&&pend.length>lastPend)ping("New payment: "+pend[0].username+" · "+pend[0].amount+" UGX");lastPend=pend.length;
+$("plan").textContent=`${j.plan.free} free uses · ${j.plan.price} UGX for ${j.plan.days} days · Admins ${na}/${j.maxAdmins} · In-app mobile money ${j.autoPay?"on":"off"}`;$("cnt").textContent="("+j.users.length+")";
+$("addAdm").classList.toggle("hide",!(j.isOwner&&na<j.maxAdmins));
+$("pend").innerHTML=(j.members||[]).map(m=>`<div class="card r"><div><b>${esc(m.name)}</b> · ${esc(m.phone)}<br><small>Waiting to sign up · ${m.days>=3650?"no expiry":m.days+" days"}</small></div><button class="d" data-m="${esc(m.phone)}">Cancel</button></div>`).join("");
+$("pay").innerHTML=j.payments.map(p=>`<div class="card r"><div><b>${esc(p.username)}</b> · ${esc(p.amount)} UGX<br><small>TXN ${esc(p.txn)} · ${d(p.created_at)} · ${esc(p.status)}</small></div>${p.status==="pending"?`<div><button class="p" data-a="approve" data-i="${p.id}">Approve</button> <button data-a="reject" data-i="${p.id}">Reject</button></div>`:""}</div>`).join("")||"<small>No payments yet.</small>";
+const Q=($("q").value||"").trim().toLowerCase().replace(/\s/g,"");$("usr").innerHTML=j.users.filter(u=>!Q||u.username.toLowerCase().includes(Q)||String(u.phone||"").includes(Q.replace(/^\+?256/,"0"))).map(u=>{const rm=u.id!==j.meId&&(u.role!=="admin"||j.isOwner)&&!(u.role==="admin"&&u.id===1&&false);
+return `<div class="card r"><div><b>${esc(u.username)}</b> · ${esc(u.phone||"")} ${u.role==="admin"?"· admin":""}<br><small>${u.free_used} free used · ${u.sub_until>Date.now()?"active until "+d(u.sub_until):"no active plan"} · joined ${d(u.created_at)}</small></div><div><button data-g="${u.id}">Grant days</button> <button data-r="${u.id}" data-n="${esc(u.username)}">Reset password</button> ${rm?`<button class="d" data-x="${u.id}" data-n="${esc(u.username)}">Remove</button>`:""}</div></div>`}).join("")}
+const flash=(el,r,ok)=>{el.className=r.ok?"ok":"er";el.textContent=r.ok?ok(r.j):(r.j.error||"Something went wrong.")};
+$("add").onsubmit=async e=>{e.preventDefault();const r=await call("/api/admin/members","POST",{name:$("nm").value,phone:$("ph").value,days:+$("days").value||0});flash($("msg"),r,j=>j.message);if(r.ok){$("add").reset();load()}};
+$("addAdm").onsubmit=async e=>{e.preventDefault();const r=await call("/api/admin/admins","POST",{phone:$("ap").value,username:$("au").value,password:$("aw").value});flash($("amsg"),r,()=>"Admin added.");if(r.ok){$("addAdm").reset();load()}};
+$("payForm").onsubmit=async e=>{e.preventDefault();const r=await call("/api/admin/settings","POST",{payNumber:$("payNum").value});flash($("payMsg"),r,()=>"Payment number updated.");if(r.ok)load()};
+$("priceForm").onsubmit=async e=>{e.preventDefault();const r=await call("/api/admin/settings","POST",{price:$("priceIn").value});flash($("priceMsg"),r,()=>"Amount updated. New payments use it.");if(r.ok)load()};
+$("waForm").onsubmit=async e=>{e.preventDefault();const r=await call("/api/admin/settings","POST",{whatsapp:$("waIn").value});flash($("waMsg"),r,()=>"WhatsApp number updated.");if(r.ok)load()};
+$("anForm").onsubmit=async e=>{e.preventDefault();const r=await call("/api/admin/settings","POST",{announcement:$("anIn").value});flash($("anMsg"),r,()=>"Announcement updated.");if(r.ok)load()};
+let T;$("q").oninput=()=>{clearTimeout(T);T=setTimeout(load,250)};
+function ping(t){try{const c=new(window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator();o.connect(c.destination);o.frequency.value=880;o.start();setTimeout(()=>o.stop(),250)}catch(e){}try{if(window.Notification&&Notification.permission==="granted")new Notification("RizzByJulius",{body:t})}catch(e){}}
+$("enableAlerts").onclick=async()=>{try{await Notification.requestPermission();ping("Alerts are on")}catch(e){}};
+setInterval(load,20000);
+document.addEventListener("click",async e=>{const t=e.target;
+if(t.dataset.a){await call(`/api/admin/payments/${t.dataset.i}/${t.dataset.a}`,"POST");load()}
+if(t.dataset.g){const n=prompt("Grant how many days?","7");if(n){await call(`/api/admin/users/${t.dataset.g}/grant`,"POST",{days:+n});load()}}
+if(t.dataset.m){await call("/api/admin/members/"+encodeURIComponent(t.dataset.m),"DELETE");load()}
+if(t.dataset.r&&confirm("Reset password for "+t.dataset.n+"?")){const r=await call("/api/admin/users/"+t.dataset.r+"/reset","POST");alert(r.ok?"Temporary password for "+t.dataset.n+": "+r.j.password+"\n\nSend it to them privately and ask them to change it.":(r.j.error||"Couldn't reset."))}
+if(t.dataset.x&&confirm("Remove "+t.dataset.n+"? This deletes their account and payments.")){const r=await call("/api/admin/users/"+t.dataset.x,"DELETE");if(!r.ok)alert(r.j.error||"Couldn't remove.");load()}});
+load();
+</script></body></html>
