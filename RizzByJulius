@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RizzByJulius — your AI wingman</title>
+<style>
+:root{--bg:#0d0d12;--card:#17171f;--line:#2a2a36;--tx:#f3f3f7;--mu:#9a9aae;--ac:#ff4d6d;--ac2:#ff8a5c;--ok:#34d399;--mid:#fbbf24;--lo:#f87171;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root[data-theme="light"]{--bg:#f6f6f9;--card:#fff;--line:#e2e2ea;--tx:#15151c;--mu:#6b6b7e}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#f6f6f9;--card:#fff;--line:#e2e2ea;--tx:#15151c;--mu:#6b6b7e}}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:560px;margin:0 auto;padding:16px 16px 48px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+h1{font-size:26px;margin:0;letter-spacing:-.5px}h1 span{background:linear-gradient(90deg,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--mu);margin:0 0 16px;font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:14px}
+.tabs{display:flex;gap:6px;margin-bottom:14px}
+.tab,.chip,.btn,.ib{font:inherit;color:var(--tx);cursor:pointer;border:1px solid var(--line);background:var(--card);border-radius:999px}
+.tab{flex:1;padding:12px 6px;font-size:14px;font-weight:600}
+.tab.on,.chip.on{background:linear-gradient(90deg,var(--ac),var(--ac2));border-color:transparent;color:#fff}
+.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{padding:10px 16px;font-size:15px;min-height:44px}
+label,.lbl{display:block;font-size:13px;color:var(--mu);margin:0 0 6px;font-weight:600}
+textarea,input[type=text],input[type=password],select{width:100%;background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:12px;padding:12px;font:inherit;resize:vertical}
+textarea{min-height:90px}
+.btn{width:100%;padding:16px;font-size:17px;font-weight:700;border-radius:14px;background:linear-gradient(90deg,var(--ac),var(--ac2));color:#fff;border:0}
+.btn:disabled{opacity:.5}.ghost{background:transparent;color:var(--tx);border:1px solid var(--line);font-weight:600}
+.ib{padding:8px 14px;font-size:14px;min-height:40px}
+.up{display:flex;align-items:center;gap:10px;border:1.5px dashed var(--line);border-radius:12px;padding:12px;cursor:pointer;margin-bottom:10px;color:var(--mu)}
+.up img{height:56px;border-radius:8px}.up input{display:none}
+input[type=range]{width:100%;accent-color:var(--ac)}.sl{display:flex;justify-content:space-between;font-size:12px;color:var(--mu)}
+.rep{border-top:1px solid var(--line);padding:12px 0}.rep:first-of-type{border:0}
+.rep p{margin:0 0 6px;font-size:17px}.why{color:var(--mu);font-size:13px;margin:0 0 8px}
+.pill{display:inline-block;padding:4px 12px;border-radius:999px;font-weight:700;font-size:13px;color:#111}
+.hi{background:var(--ok)}.neutral{background:var(--mid)}.low{background:var(--lo)}
+.warn{border-color:var(--lo);background:rgba(248,113,113,.1);border-radius:12px;border:1px solid;padding:10px;margin:10px 0;font-size:14px}
+.tip{font-size:14px;margin:8px 0 0}.hide{display:none!important}.tabs2{display:flex;gap:6px;margin-bottom:14px}a.ib{text-decoration:none;display:inline-block}.err{color:var(--lo);font-size:14px}
+.score{font-size:44px;font-weight:800;line-height:1}
+.h{display:flex;justify-content:space-between;gap:8px;padding:10px 0;border-top:1px solid var(--line);font-size:14px}.h small{color:var(--mu)}
+.note{color:var(--mu);font-size:12px;text-align:center;margin-top:18px}
+.row{display:flex;gap:8px;align-items:center;justify-content:space-between}
+</style></head><body><main>
+<header><h1>Rizz<span>ByJulius</span></h1><button class="ib" id="theme" aria-label="Toggle theme">🌓</button></header>
+<p class="sub">Your AI wingman for dating apps and texts.</p>
+<div class="warn">Preview only: demo data, sample replies, nothing is saved. Sign up with any phone number like 0701234567. <a href="https://claude.ai/artifact/4WqGRPQsTyRHxTiVFXc3Fp" target="_blank" rel="noopener" style="color:inherit"><b>Open admin panel preview →</b></a></div>
+<div id="ann" class="hide" style="background:rgba(255,77,109,.12);border:1px solid var(--ac);border-radius:12px;padding:10px;margin-bottom:12px;font-size:14px;display:flex;justify-content:space-between;gap:8px"><span id="annTxt"></span><button class="ib" id="annX" style="min-height:0;padding:2px 10px">✕</button></div>
+<div class="hide" id="home"><h2 style="font-size:28px;margin:6px 0;line-height:1.2">Never run out of things to say.</h2><p class="sub" style="font-size:16px">Upload a chat or paste her reply. RizzByJulius reads the vibe and gives you 3 replies that sound like you.</p><div class="card"><p style="margin:0 0 8px">📷 Reads chat screenshots</p><p style="margin:0 0 8px">🎭 Flirty, spicy, casual, funny or motivating</p><p style="margin:0 0 8px">📊 Honest interest-level read</p><p style="margin:0" id="priceLine">🎁 10 free tries, then 3000 UGX for 7 days</p></div><a id="wa" class="btn ghost hide" style="display:block;text-align:center;text-decoration:none" target="_blank" rel="noopener" href="#">💬 Need help? Chat with us on WhatsApp</a></div>
+<div class="card hide" id="authCard"><div class="tabs2" id="authTabs"><button class="tab on" data-a="login">Log in</button><button class="tab" data-a="signup">Sign up</button></div>
+<form id="authForm"><label for="ph">Phone number</label><input type="text" id="ph" inputmode="tel" autocomplete="tel" placeholder="0701234567"><div style="height:10px"></div><label for="un">Username</label><input type="text" id="un" autocomplete="username" autocapitalize="none"><div style="height:10px"></div><label for="pw">Password</label><input type="password" id="pw" autocomplete="current-password"><div id="sgnBox" class="hide"><div id="otpRow" class="row hide" style="gap:8px;margin-top:10px"><input type="text" id="otp" inputmode="numeric" placeholder="SMS code" style="flex:1"><button type="button" class="ib" id="otpBtn">Send code</button></div>
+<input type="text" id="rf" placeholder="Invite code (optional)" style="margin-top:10px" autocapitalize="characters">
+<label style="display:flex;gap:8px;align-items:flex-start;margin:10px 0 0;color:var(--tx)"><input type="checkbox" id="agree" style="width:auto;margin-top:3px"><span>I'm 18 or older and agree to the <a href="https://claude.ai/artifact/6m5DJPq8gVPCKfP63Sa1tS" target="_blank" rel="noopener">Terms</a></span></label></div>
+<div style="margin-top:14px"><button class="btn" id="authGo">Log in</button></div><p class="err" id="authErr"></p><p class="sub" style="margin:4px 0 0"><a href="#" id="fpLink" style="color:var(--mu)">Forgot password?</a></p></form>
+<form id="fpForm" class="hide" style="margin-top:12px"><div class="lbl">Reset password</div><div id="fpNoSms" class="hide"><p class="sub">Contact us on WhatsApp and an admin will reset your password.</p></div>
+<div id="fpSms" class="hide"><input type="text" id="fpPh" inputmode="tel" placeholder="Your phone number"><div class="row" style="gap:8px;margin-top:8px"><input type="text" id="fpCode" inputmode="numeric" placeholder="SMS code" style="flex:1"><button type="button" class="ib" id="fpSend">Send code</button></div><input type="password" id="fpNew" placeholder="New password (8+ characters)" autocomplete="new-password" style="margin-top:8px"><div style="margin-top:10px"><button class="btn" type="submit">Set new password</button></div></div><p class="sub" id="fpMsg"></p></form><p class="sub">New accounts get 10 free uses. You stay signed in on this device.</p>
+<p class="sub" style="margin:8px 0 0"><a href="#" id="admLink" style="color:var(--mu)">Admin access</a></p>
+<form id="codeForm" class="hide"><label for="code">Admin code</label><input type="password" id="code" autocomplete="off" autocapitalize="characters"><div style="margin-top:10px"><button class="btn" type="submit">Enter</button></div><p class="err" id="codeErr"></p></form></div>
+<div class="card hide" id="bar"><div class="row"><div><b id="who"></b><br><small id="cred" style="color:var(--mu)"></small></div><div><a class="ib hide" id="adm" href="/admin">Admin</a> <button class="ib" id="chpw">Password</button> <button class="ib" id="logout">Log out</button></div></div>
+<div id="invBox" class="hide" style="margin-top:10px"><small style="color:var(--mu)">Invite a friend with your code: you both get extra free tries.</small><div class="row" style="margin-top:6px"><b id="invCode"></b><button class="ib" id="invCopy">Copy invite link</button></div></div>
+<form id="cpForm" class="hide" style="margin-top:10px"><input type="password" id="cpOld" placeholder="Current password" autocomplete="current-password"><input type="password" id="cpNew" placeholder="New password (8+ characters)" autocomplete="new-password" style="margin-top:8px"><div style="margin-top:8px"><button class="btn" type="submit">Change password</button></div><p class="sub" id="cpMsg"></p></form></div>
+<div class="card hide" id="payCard"><div class="lbl" id="payLbl">Free trial finished</div><p id="payInfo" style="margin:0 0 10px"></p>
+<div id="autoBox" class="hide"><label for="mmNet">Mobile money network</label><select id="mmNet"><option value="AIRTEL">Airtel Money</option><option value="MTN">MTN MoMo</option></select><div style="height:10px"></div><label for="mmPhone">Mobile money number</label><input type="text" id="mmPhone" inputmode="tel" placeholder="0741234567"><div style="margin-top:10px"><button class="btn" id="mmGo">Pay with mobile money</button></div><p class="sub" id="mmMsg"></p><p class="sub" style="margin:10px 0">Or pay manually:</p></div>
+<p id="manInfo" class="sub" style="margin:0 0 8px"></p><input type="text" id="txn" placeholder="Airtel transaction ID"><div style="margin-top:10px"><button class="btn ghost" id="payGo">I've paid manually, submit</button></div><p class="sub" id="payMsg"></p><button class="ib" id="payRef">Refresh my access</button></div>
+<div id="app" class="hide">
+
+<div class="tabs"><button class="tab on" data-m="reply">Reply</button><button class="tab" data-m="rate">Rate mine</button><button class="tab" data-m="opener">Opener</button></div>
+
+<div class="card" id="moodCard"><div class="lbl">Mood — pick 1 or mix 2</div><div class="chips" id="chips"></div>
+<div style="margin-top:14px"><div class="lbl">Reply length</div><input type="range" id="len" min="0" max="2" value="1"><div class="sl"><span>Short</span><span>Medium</span><span>Long</span></div></div><div style="margin-top:14px"><label for="lang">Reply language</label><select id="lang"><option>English</option><option>Luganda</option><option>Swahili</option></select></div></div>
+
+<div class="card">
+<label class="up" id="upBox"><span id="upTxt">📷 <b id="upLbl">Upload chat screenshot</b></span><input type="file" id="file" accept="image/*"></label>
+<div id="rm" class="hide" style="margin-bottom:10px"><button class="ib" id="rmBtn">Remove screenshot</button></div>
+<label id="inLbl" for="inp">Or type / paste her reply</label>
+<textarea id="inp" placeholder="her message…"></textarea>
+<div style="margin-top:10px" id="ctxWrap"><label for="ctx">Extra context (optional)</label><input type="text" id="ctx" placeholder="we matched yesterday, she's into hiking"></div>
+<div style="margin-top:14px"><button class="btn" id="go">Get replies</button></div>
+<p class="err" id="err"></p></div>
+
+<div id="out"></div>
+
+<div class="card"><div class="lbl">Text starters — tap to copy</div><div class="chips" id="sc" style="margin-bottom:8px"></div><div id="sl"></div></div>
+
+<div class="card"><div class="row"><div class="lbl" style="margin:0">History (saved on this device)</div><button class="ib" id="clr">Clear</button></div><div id="hist"></div></div>
+</div>
+<p class="note">🔒 Screenshots are not stored. Only text suggestions are saved locally on your device. <a href="https://claude.ai/artifact/6m5DJPq8gVPCKfP63Sa1tS" target="_blank" rel="noopener" style="color:inherit">Terms</a></p>
+</main>
+<script>
+const MOODS=[["Flirty","😏"],["Spicy","🔥"],["Casual","😌"],["Funny","😂"],["Motivating","💪"]];
+const $=id=>document.getElementById(id);let mode="reply",sel=["Flirty"],img=null,sample=null,busy=false,last=null,n=0;
+const LS={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function chips(){$("chips").innerHTML=MOODS.map(([m,e])=>`<button class="chip${sel.includes(m)?" on":""}" data-m="${m}">${e} ${m}</button>`).join("")}
+$("chips").onclick=e=>{const m=e.target.dataset.m;if(!m)return;if(sel.includes(m)){if(sel.length>1)sel=sel.filter(x=>x!==m)}else{sel.push(m);if(sel.length>2)sel.shift()}chips()};
+const TXT={reply:["Upload chat screenshot","Or type / paste her reply","Get replies","her message…"],rate:["Upload chat screenshot (optional)","Paste your draft reply (and her message for context)","Rate my reply","Your draft…"],opener:["Upload her profile screenshot","Or paste her bio","Generate openers","her bio / prompts…"]};
+function setMode(m){mode=m;document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("on",t.dataset.m===m));const t=TXT[m];$("upLbl").textContent=t[0];$("inLbl").textContent=t[1];$("go").textContent=t[2];$("inp").placeholder=t[3];$("out").innerHTML="";$("err").textContent="";last=null}
+document.querySelector(".tabs").onclick=e=>{if(e.target.dataset.m)setMode(e.target.dataset.m)};
+$("file").onchange=e=>{const f=e.target.files[0];if(!f)return;img=f;$("upTxt").innerHTML=`<img alt="" src="${URL.createObjectURL(f)}"> <b>Screenshot ready</b>`;$("rm").classList.remove("hide")};
+$("rmBtn").onclick=()=>{img=null;$("file").value="";$("upTxt").innerHTML='📷 <b id="upLbl">'+TXT[mode][0]+'</b>';$("rm").classList.add("hide")};
+$("theme").onclick=()=>{const r=document.documentElement,d=getComputedStyle(r).getPropertyValue("--bg").trim()==="#0d0d12";r.dataset.theme=d?"light":"dark"};
+function hist(){const h=LS.get("rizz_h")||[];$("hist").innerHTML=h.length?h.map((x,i)=>`<div class="h"><div><small>${esc(x.mode)} · ${esc(x.mood)} · ${esc(x.when)}</small><br>${esc(x.text)}</div><button class="ib" data-c="${i}">Copy</button></div>`).join(""):'<p class="sub" style="margin:8px 0 0">Nothing yet.</p>'}
+$("hist").onclick=e=>{const i=e.target.dataset.c;if(i!=null)copy((LS.get("rizz_h")||[])[i]?.text,e.target)};
+$("clr").onclick=()=>{LS.set("rizz_h",[]);hist()};
+async function copy(t,b){try{await navigator.clipboard.writeText(t)}catch(e){const a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();try{document.execCommand("copy")}catch(_){}a.remove()}const o=b.textContent;b.textContent="Copied ✓";setTimeout(()=>b.textContent=o,1200)}
+function render(d){
+const pill=i=>`<span class="pill ${i==="high"?"hi":i==="low"?"low":"neutral"}">Interest: ${esc(i||"neutral")}</span>`;
+let h='<div class="card">';
+if(mode==="rate"){h+=`<div class="row"><div><div class="score">${esc(d.score)}/10</div></div>${pill(d.interest)}</div><p>${esc(d.verdict)}</p><ul>${(d.improvements||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`;
+if(d.improved)h+=`<div class="rep"><div class="lbl">Improved version</div><p>${esc(d.improved.text)}</p><p class="why">${esc(d.improved.why)}</p><button class="ib" data-t="${esc(d.improved.text)}">Copy</button></div>`}
+else{if(mode==="reply")h+=`<div class="row">${pill(d.interest)}<span class="why" style="margin:0">${esc(d.stage)}</span></div><p class="tip"><b>She's signaling:</b> ${esc(d.signals)}</p>`+(d.heat?`<p class="tip">🌡️ <b>Heat level:</b> ${esc(d.heat)}</p>`:"")+(d.shouldReply===false?`<div class="warn"><b>Heads up:</b> ${esc(d.advice)}</div>`:"");else h+=`<p class="tip"><b>Vibe:</b> ${esc(d.vibe)}</p>`;
+h+=(d.replies||[]).map(r=>`<div class="rep"><p>${esc(r.text)}</p><p class="why">💡 ${esc(r.why)}</p><button class="ib" data-t="${esc(r.text)}">Copy</button></div>`).join("")}
+h+=`<p class="tip">✨ <b>Tip:</b> ${esc(d.tip)}</p><div style="margin-top:12px"><button class="btn ghost" id="regen">↻ Regenerate</button></div></div>`;
+$("out").innerHTML=h;$("out").scrollIntoView({behavior:"smooth"})}
+$("out").onclick=e=>{if(e.target.dataset.t)copy(e.target.dataset.t,e.target);if(e.target.id==="regen")run(true)};
+async function run(re){
+if(busy)return;$("err").textContent="";
+const txt=$("inp").value.trim();if(!txt&&!img){$("err").textContent="Add a screenshot or some text first.";return}
+
+busy=true;$("go").disabled=true;$("go").textContent="Thinking…";if(re)$("out").innerHTML='<div class="card sub">Cooking up fresh options…</div>';
+try{const out=await api("/api/generate",{mode,moods:sel,length:+$("len").value,text:txt,context:$("ctx").value.trim(),regen:!!re,lang:$("lang").value,image:img?await toDataUrl(img):null});me=out.me;bar();const d=out.data;last=d;render(d);
+const first=(d.replies&&d.replies[0]?.text)||d.improved?.text||"";if(first){const h=LS.get("rizz_h")||[];h.unshift({mode,mood:sel.join("+"),text:first,when:new Date().toLocaleDateString()});LS.set("rizz_h",h.slice(0,30));hist()}}
+catch(e){$("out").innerHTML="";if(e&&e.code==="PAYWALL"&&me)showPay();$("err").textContent=(e&&e.message)||"Something went wrong. Try again."}
+busy=false;$("go").disabled=false;$("go").textContent=TXT[mode][2]}
+$("go").onclick=()=>run(false);
+const ST={"Cute":["Random, but you just crossed my mind and now I'm smiling at my phone.","Okay, you've officially taken over my playlist. Every song is about you now.","Tell me one thing that made you smile today. I'm collecting.","I like how easy it is to talk to you. Rare find.","Free this weekend? I've got a plan and you're in it.","Not to be dramatic, but my day got better when your name popped up."],
+"Good morning":["Morning you. Fair warning: you were my first thought today.","Coffee's good, but seeing your name pop up is better.","Rise and shine. I'll be the reason you're smiling at your phone.","Good morning. Go be unfairly charming today.","Woke up and you were the first thing on my mind. Annoying how often that's happening.","Hope your day starts as well as mine did, which was reading your last text."],
+"Funny":["I'm making the first move here, so please be impressed.","Serious question, it decides everything: pineapple on pizza, yes or no?","I'd like to formally apply for the position of your favorite text.","Be honest, how long did you stare at my last message before replying?","Are you a blanket hog? I need to know before this goes any further.","Our banter is carrying this whole conversation. I'm just along for the ride."],
+"Playful":["I opened your profile to say hi and forgot every word I know. Hi.","Seeing your name on my screen is officially the best part of my day. No pressure.","I'm roughly 60% sure this text is charming. The other 40% is hoping you laugh anyway.","I told myself I'd play it cool. That lasted about four minutes.","I was going to be productive tonight. Then you texted, and priorities changed.","Texting you was supposed to be a quick check-in. Now it's way past my bedtime.","Rate my flirting out of ten. Be gentle, I'm clearly out of practice.","Trade with me: your most embarrassing text moment for mine. You go first."],
+"Naughty-funny":["I'd say I'm a good influence, but we both know that's not why you're texting me.","I've been behaving all day. You're not making it easy to keep that up.","My plans tonight were innocent until your name showed up.","Careful, keep texting like that and I'll start getting ideas. Good ones.","I'd tell you what I'm thinking, but I'd like to at least buy you a drink first.","Fair warning: I'm a lot more fun in person, and slightly more dangerous."],
+"On their mind":["Saw something today that reminded me of you. Now I have to tell you about it.","I'm supposed to be working. You're not helping.","Something funny happened and I'm saving the story for you.","Dinner this week? I'll pick the place, you pick the vibe.","I've got a free Saturday and a good idea. Interested?","Still thinking about the last time we hung out. Round two soon?"]};
+let sc="Cute";
+function stRender(){$("sc").innerHTML=Object.keys(ST).map(k=>`<button class="chip${k===sc?" on":""}" data-k="${k}">${k}</button>`).join("");$("sl").innerHTML=ST[sc].map(t=>`<div class="h"><div>${esc(t)}</div><button class="ib" data-t="${esc(t)}">Copy</button></div>`).join("")}
+$("sc").onclick=e=>{if(e.target.dataset.k){sc=e.target.dataset.k;stRender()}};
+$("sl").onclick=e=>{if(e.target.dataset.t)copy(e.target.dataset.t,e.target)};
+stRender();chips();hist();
+let me=null;
+const DEMO={me:null,used:0};
+const dview=()=>({username:DEMO.me.username,role:"user",freeLeft:Math.max(0,10-DEMO.used),free:10,subUntil:DEMO.paid?Date.now()+6048e5:0,active:!!DEMO.paid,price:3000,days:7,payNumber:"0741829090",auto:true,refCode:"JULI42"});
+const R=(a,b)=>({text:a,why:b});
+const CANNED={reply:{stage:"Building connection",interest:"high",signals:"She's matching your energy and asking a question back, which is a green flag.",heat:"keep playful: she's engaged but hasn't escalated yet",shouldReply:true,advice:"",replies:[R("Okay, fair answer. Now I'm curious what you'd actually do with a free Saturday.","Keeps the banter going and steers toward plans."),R("You're dangerously easy to talk to. That's a problem for my productivity.","Light teasing plus a compliment, matches her tone."),R("Plot twist: I'm better in person. Want to find out this week?","Confident, low-pressure date ask.")],tip:"Ask one specific question per message so she has something easy to run with."},
+rate:{score:7,interest:"neutral",verdict:"Solid and friendly, but a little generic. A specific detail would make it stick.",improvements:["Reference something she said","Cut the filler at the start","End with a hook or question"],improved:R("Honestly the hiking story won me over. Which trail was it? I need to steal the idea.","Specific, shows you listened, and ends with an easy question."),tip:"Specific beats clever almost every time."},
+opener:{vibe:"Outdoorsy, playful, likes travel and good food.",replies:[R("Your hiking photo wins. Tell me you also have a strong opinion on trail snacks.","Specific to her profile and easy to answer."),R("Rating the view in your 3rd photo 10/10. Rating your coffee order is pending. Go.","Playful and invites a reply."),R("Be honest, did you pick that trail for the view or the bragging rights?","Light teasing, gets her talking.")],tip:"Mention one real detail from her profile, then ask one question."}};
+async function api(url,b){await new Promise(r=>setTimeout(r,600));b=b||{};
+if(url==="/api/me"){if(!DEMO.me)throw new Error("x");return{me:dview()}}
+if(url==="/api/signup"||url==="/api/login"){const u=String(b.username||"").trim();
+if(url==="/api/signup"){if(!b.agree)throw new Error("Please confirm you are 18+ and accept the Terms.");if(b.code!=="123456")throw new Error("Enter the SMS code. (Demo code: 123456)");if(!/^0\d{9}$/.test(String(b.phone||"").replace(/\s/g,"")))throw new Error("Enter a valid phone number, e.g. 0701234567.");if(!/^[A-Za-z0-9_]{3,20}$/.test(u))throw new Error("Username: 3-20 letters, numbers or underscore.");if(String(b.password||"").length<8)throw new Error("Password must be at least 8 characters.")}
+else if(!u||!b.password)throw new Error("Wrong login details.");
+DEMO.me={username:u.toLowerCase()};DEMO.used=0;return{me:dview()}}
+if(url==="/api/logout"){DEMO.me=null;return{ok:true}}
+if(url==="/api/pay"){if(!String(b.txn||"").trim())throw new Error("Enter the transaction ID from your Airtel confirmation SMS.");return{message:"Received. Access starts once the admin confirms your payment."}}
+if(url==="/api/generate"){if(DEMO.used>=10){const e=new Error("Free trial finished. Pay 3000 UGX for 7 days to continue.");e.code="PAYWALL";throw e}DEMO.used++;return{data:CANNED[b.mode],me:dview()}}
+if(url==="/api/otp/send"){if(!/^0\d{9}$/.test(String(b.phone||"").replace(/\s/g,"")))throw new Error("Enter a valid phone number, e.g. 0701234567.");return{ok:1,message:"Code sent. (Demo: use 123456)"}}
+if(url==="/api/password/reset"){if(b.code!=="123456")throw new Error("Wrong or expired code.");if(String(b.password||"").length<8)throw new Error("Password must be at least 8 characters.");return{ok:1}}
+if(url==="/api/change-password"){if(String(b.newPassword||"").length<8)throw new Error("New password must be at least 8 characters.");return{ok:1}}
+if(url==="/api/config")return{whatsapp:"256741829090",price:3000,days:7,free:10,sms:true,announcement:"🎉 New: replies in Luganda and Swahili!"};
+if(url==="/api/pay/start"){if(!/^0\d{9}$/.test(String(b.phone||"").replace(/\s/g,"")))throw new Error("Enter a valid mobile money number, e.g. 0741234567.");DEMO.pt=Date.now();return{ref:"DEMO",message:"Check your phone and enter your mobile money PIN to approve 3000 UGX. (Demo: it confirms in about 10 seconds.)"}}
+if(url.startsWith("/api/pay/status/")){if(Date.now()-DEMO.pt>9000){DEMO.paid=true;return{status:"paid"}}return{status:"processing"}}
+throw new Error("On the real site this opens the admin panel. Use the admin panel preview link above.")}
+function toDataUrl(f){return new Promise((res,rej)=>{const i=new Image(),u=URL.createObjectURL(f);i.onload=()=>{const k=Math.min(1,1400/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext("2d").drawImage(i,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c.toDataURL("image/jpeg",.85))};i.onerror=()=>rej(new Error("Couldn't read that image."));i.src=u})}
+const show=(id,on)=>$(id).classList.toggle("hide",!on);
+function showPay(){$("payLbl").textContent=me.active?"Your access ends soon. Renew now":"Free trial finished";$("payInfo").textContent=`Pay ${me.price} UGX for ${me.days} days of access.`;$("manInfo").textContent=`Send ${me.price} UGX to ${me.payNumber} on Airtel Money, then enter the transaction ID. Access starts once the admin confirms.`;show("autoBox",!!me.auto);if(me.phone&&!$("mmPhone").value)$("mmPhone").value=me.phone;show("payCard",true)}
+function bar(){if(!me){show("home",true);show("authCard",true);show("bar",false);show("app",false);show("payCard",false);return}
+show("home",false);show("authCard",false);show("bar",true);show("app",true);$("who").textContent=me.username;
+$("cred").textContent=me.role==="admin"?"Admin":me.active?"Active until "+new Date(me.subUntil).toLocaleString():me.freeLeft+" of "+me.free+" free uses left";
+show("adm",me.role==="admin");show("invBox",me.role!=="admin"&&!!me.refCode);$("invCode").textContent=me.refCode||"";show("payCard",false);if(me.role!=="admin"&&((!me.active&&me.freeLeft<=0)||(me.active&&me.subUntil-Date.now()<3*864e5)))showPay()}
+let amode="login",CFG={};
+document.querySelectorAll("#authTabs button").forEach(b=>b.onclick=()=>{amode=b.dataset.a;document.querySelectorAll("#authTabs button").forEach(x=>x.classList.toggle("on",x===b));$("authGo").textContent=amode==="login"?"Log in":"Create account";$("pw").autocomplete=amode==="login"?"current-password":"new-password";show("sgnBox",amode==="signup");show("fpLink",amode==="login");show("otpRow",amode==="signup"&&!!CFG.sms)});
+$("authForm").onsubmit=async(e)=>{e.preventDefault();$("authErr").textContent="";try{const r=await api("/api/"+amode,{username:$("un").value,password:$("pw").value,phone:$("ph").value,agree:$("agree").checked,code:$("otp").value,ref:$("rf").value});me=r.me;try{localStorage.setItem("rizz_last",JSON.stringify({u:$("un").value.trim(),p:$("ph").value.trim()}))}catch(_){}try{if(window.PasswordCredential)navigator.credentials.store(new PasswordCredential({id:$("un").value.trim(),password:$("pw").value,name:$("un").value.trim()}))}catch(_){}$("pw").value="";bar()}catch(e){$("authErr").textContent=e.message}};
+$("logout").onclick=async()=>{try{await api("/api/logout",{})}catch(e){}me=null;$("out").innerHTML="";bar()};
+$("payGo").onclick=async()=>{$("payMsg").textContent="";try{const r=await api("/api/pay",{txn:$("txn").value});$("txn").value="";$("payMsg").textContent=r.message}catch(e){$("payMsg").textContent=e.message}};
+$("mmGo").onclick=async()=>{const m=$("mmMsg");m.textContent="";$("mmGo").disabled=true;try{const r=await api("/api/pay/start",{phone:$("mmPhone").value,network:$("mmNet").value});m.textContent=r.message;await pollPay(r.ref)}catch(e){m.textContent=e.message}$("mmGo").disabled=false};
+async function pollPay(ref){for(let i=0;i<45;i++){await new Promise(r=>setTimeout(r,4000));try{const r=await api("/api/pay/status/"+ref);if(r.status==="paid"){$("mmMsg").textContent="Payment received. Unlocking...";await boot();return}if(r.status==="failed"){$("mmMsg").textContent="The payment didn't go through. Try again.";return}}catch(e){}}$("mmMsg").textContent="Still waiting. Approve on your phone, then tap Refresh my access."}
+$("payRef").onclick=()=>boot();
+$("chpw").onclick=()=>show("cpForm",$("cpForm").classList.contains("hide"));
+$("cpForm").onsubmit=async e=>{e.preventDefault();try{await api("/api/change-password",{oldPassword:$("cpOld").value,newPassword:$("cpNew").value});$("cpMsg").textContent="Password changed.";$("cpOld").value=$("cpNew").value=""}catch(err){$("cpMsg").textContent=err.message}};
+$("invCopy").onclick=()=>copy(location.origin+"/?ref="+me.refCode,$("invCopy"));
+$("otpBtn").onclick=async()=>{try{const r=await api("/api/otp/send",{phone:$("ph").value,purpose:"signup"});$("authErr").textContent=r.message||"Code sent by SMS."}catch(e){$("authErr").textContent=e.message}};
+$("fpLink").onclick=e=>{e.preventDefault();show("fpForm",true);$("fpPh").value=$("ph").value;show("fpNoSms",!CFG.sms);show("fpSms",!!CFG.sms)};
+$("fpSend").onclick=async()=>{try{await api("/api/otp/send",{phone:$("fpPh").value,purpose:"reset"});$("fpMsg").textContent="If that number has an account, a code was sent."}catch(e){$("fpMsg").textContent=e.message}};
+$("fpForm").onsubmit=async e=>{e.preventDefault();try{await api("/api/password/reset",{phone:$("fpPh").value,code:$("fpCode").value,password:$("fpNew").value});$("fpMsg").textContent="Password changed. You can log in now.";$("fpNew").value=$("fpCode").value=""}catch(err){$("fpMsg").textContent=err.message}};
+$("annX").onclick=()=>{try{localStorage.setItem("rizz_ann",$("annTxt").textContent)}catch(_){}show("ann",false)};
+$("admLink").onclick=e=>{e.preventDefault();show("codeForm",true);$("code").focus()};
+$("codeForm").onsubmit=async e=>{e.preventDefault();$("codeErr").textContent="";try{await api("/api/admin-code",{code:$("code").value});location.href="/admin"}catch(err){$("codeErr").textContent=err.message}$("code").value=""};
+try{const l=JSON.parse(localStorage.getItem("rizz_last")||"null");if(l){$("un").value=l.u||"";$("ph").value=l.p||""}}catch(e){}
+async function boot(){const rq=new URLSearchParams(location.search).get("ref");if(rq&&!$("rf").value){$("rf").value=rq;document.querySelector('#authTabs [data-a="signup"]').click()}try{const c=await api("/api/config");CFG=c;if(c.whatsapp){$("wa").href="https://wa.me/"+c.whatsapp;show("wa",true)}$("priceLine").textContent=`🎁 ${c.free} free tries, then ${c.price} UGX for ${c.days} days`;show("otpRow",amode==="signup"&&!!c.sms);let seen="";try{seen=localStorage.getItem("rizz_ann")}catch(_){}show("ann",!!(c.announcement&&c.announcement!==seen));$("annTxt").textContent=c.announcement||""}catch(e){}try{me=(await api("/api/me")).me}catch(e){me=null}bar()}
+boot();
+</script></body></html>
+
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RizzByJulius — your AI wingman</title>
+<style>
+:root{--bg:#0d0d12;--card:#17171f;--line:#2a2a36;--tx:#f3f3f7;--mu:#9a9aae;--ac:#ff4d6d;--ac2:#ff8a5c;--ok:#34d399;--mid:#fbbf24;--lo:#f87171;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root[data-theme="light"]{--bg:#f6f6f9;--card:#fff;--line:#e2e2ea;--tx:#15151c;--mu:#6b6b7e}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#f6f6f9;--card:#fff;--line:#e2e2ea;--tx:#15151c;--mu:#6b6b7e}}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:560px;margin:0 auto;padding:16px 16px 48px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+h1{font-size:26px;margin:0;letter-spacing:-.5px}h1 span{background:linear-gradient(90deg,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--mu);margin:0 0 16px;font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:14px}
+.tabs{display:flex;gap:6px;margin-bottom:14px}
+.tab,.chip,.btn,.ib{font:inherit;color:var(--tx);cursor:pointer;border:1px solid var(--line);background:var(--card);border-radius:999px}
+.tab{flex:1;padding:12px 6px;font-size:14px;font-weight:600}
+.tab.on,.chip.on{background:linear-gradient(90deg,var(--ac),var(--ac2));border-color:transparent;color:#fff}
+.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{padding:10px 16px;font-size:15px;min-height:44px}
+label,.lbl{display:block;font-size:13px;color:var(--mu);margin:0 0 6px;font-weight:600}
+textarea,input[type=text]{width:100%;background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:12px;padding:12px;font:inherit;resize:vertical}
+textarea{min-height:90px}
+.btn{width:100%;padding:16px;font-size:17px;font-weight:700;border-radius:14px;background:linear-gradient(90deg,var(--ac),var(--ac2));color:#fff;border:0}
+.btn:disabled{opacity:.5}.ghost{background:transparent;color:var(--tx);border:1px solid var(--line);font-weight:600}
+.ib{padding:8px 14px;font-size:14px;min-height:40px}
+.up{display:flex;align-items:center;gap:10px;border:1.5px dashed var(--line);border-radius:12px;padding:12px;cursor:pointer;margin-bottom:10px;color:var(--mu)}
+.up img{height:56px;border-radius:8px}.up input{display:none}
+input[type=range]{width:100%;accent-color:var(--ac)}.sl{display:flex;justify-content:space-between;font-size:12px;color:var(--mu)}
+.rep{border-top:1px solid var(--line);padding:12px 0}.rep:first-of-type{border:0}
+.rep p{margin:0 0 6px;font-size:17px}.why{color:var(--mu);font-size:13px;margin:0 0 8px}
+.pill{display:inline-block;padding:4px 12px;border-radius:999px;font-weight:700;font-size:13px;color:#111}
+.hi{background:var(--ok)}.neutral{background:var(--mid)}.low{background:var(--lo)}
+.warn{border-color:var(--lo);background:rgba(248,113,113,.1);border-radius:12px;border:1px solid;padding:10px;margin:10px 0;font-size:14px}
+.tip{font-size:14px;margin:8px 0 0}.hide{display:none}.err{color:var(--lo);font-size:14px}
+.score{font-size:44px;font-weight:800;line-height:1}
+.h{display:flex;justify-content:space-between;gap:8px;padding:10px 0;border-top:1px solid var(--line);font-size:14px}.h small{color:var(--mu)}
+.note{color:var(--mu);font-size:12px;text-align:center;margin-top:18px}
+.row{display:flex;gap:8px;align-items:center;justify-content:space-between}
+</style></head><body><main>
+<header><h1>Rizz<span>ByJulius</span></h1><button class="ib" id="theme" aria-label="Toggle theme">🌓</button></header>
+<p class="sub">Your AI wingman for dating apps and texts.</p>
+
+<div class="tabs"><button class="tab on" data-m="reply">Reply</button><button class="tab" data-m="rate">Rate mine</button><button class="tab" data-m="opener">Opener</button></div>
+
+<div class="card" id="moodCard"><div class="lbl">Mood — pick 1 or mix 2</div><div class="chips" id="chips"></div>
+<div style="margin-top:14px"><div class="lbl">Reply length</div><input type="range" id="len" min="0" max="2" value="1"><div class="sl"><span>Short</span><span>Medium</span><span>Long</span></div></div></div>
+
+<div class="card">
+<label class="up" id="upBox"><span id="upTxt">📷 <b id="upLbl">Upload chat screenshot</b></span><input type="file" id="file" accept="image/*"></label>
+<div id="rm" class="hide" style="margin-bottom:10px"><button class="ib" id="rmBtn">Remove screenshot</button></div>
+<label id="inLbl" for="inp">Or type / paste her reply</label>
+<textarea id="inp" placeholder="her message…"></textarea>
+<div style="margin-top:10px" id="ctxWrap"><label for="ctx">Extra context (optional)</label><input type="text" id="ctx" placeholder="we matched yesterday, she's into hiking"></div>
+<div style="margin-top:14px"><button class="btn" id="go">Get replies</button></div>
+<p class="err" id="err"></p></div>
+
+<div id="out"></div>
+
+<div class="card"><div class="lbl">Text starters — tap to copy</div><div class="chips" id="sc" style="margin-bottom:8px"></div><div id="sl"></div></div>
+
+<div class="card"><div class="row"><div class="lbl" style="margin:0">History (saved on this device)</div><button class="ib" id="clr">Clear</button></div><div id="hist"></div></div>
+<p class="note">🔒 Screenshots are not stored. Only text suggestions are saved locally on your device.</p>
+</main>
+<script>
+const SYSTEM=`You are RizzByJulius, a sharp, warm, confident dating-and-texting wingman. You write like a real, socially smart person — never a pickup-line book, never cheesy or cringe.
+KNOWLEDGE: You fluently know modern dating/texting slang and concepts: rizz, W/L rizz, talking stage, situationship, ghosting, breadcrumbing, orbiting, love bombing, red/green flags, left on read, double text, DTR, hard/soft launch, banter, push-pull, callbacks, open loops, mirroring, "dry texter", "bare minimum". You understand stages: opener, building connection, flirting, asking for a date, mixed signals, reviving a dead convo, post-date follow-up. Identify the stage and use it.
+MOODS: Flirty = playful, teasing, confident. Spicy = noticeably bolder: heat, sexual tension, confident innuendo, "I've been thinking about you" energy, slow-burn teasing, double meanings. Make it genuinely charged, not tame, but never explicit: no graphic body-part or sex-act language, nothing crude, nothing pushy or presumptuous. Imply, don't describe. Example of the level: "I'd say you're trouble, but I've been thinking about it all day, so clearly I don't mind." For Flirty and Spicy, regularly include intimate, curious, hypothetical questions that pull her into a playful, charged exchange, e.g. "what would you do if I was there with you right now?", "what was your first kiss like?", "what's the best kiss you've ever had?", "what would you do if I showed up at your door?", "when did you first think I might be trouble?" Use them when she's engaged, and pair them with a teasing line so they don't read like an interview. STYLE INSPIRATION: draw on the energy of classic flirty texts in four families: cute and sweet ("you crossed my mind", "free this weekend?", "what made you smile today"), good-morning texts ("you were my first thought", "go be unfairly charming today"), funny/playful ("I'm making the first move, your turn", "formally applying to be your favorite text", silly would-you-rather questions like pizza or blanket-hog debates), and make-them-think-about-me ("saw something that reminded me of you", "I'm supposed to be working, you're not helping", "dinner this week, you pick the vibe"). Always write fresh, original lines tailored to her actual messages, never generic pickup lines. PLAYFUL SELF-AWARE VOICE (great for Funny/Flirty): charming self-deprecation and honesty about being a little smitten or nervous ("I forgot how to flirt", "I smiled like an idiot at your name"), relatable modern-life jokes (late-night scrolling, rereading a risky text, playlists, memes, saved fries-date fantasies), made-up percentages, light "pretend you're not falling for me" games, and cozy comparisons. It should feel like a confident person who doesn't take themselves too seriously, never needy. NAUGHTY-FUNNY: when Spicy is selected (especially with Funny), favor cheeky, witty, mischievous lines that give her a little thrill: playful innuendo, "I shouldn't say what I'm thinking" teasing, mock-warnings about being trouble, and humor that builds anticipation. Leave things unsaid so her imagination does the work. Keep it fun and confident, never explicit or crude. ESCALATION READ: calibrate heat to her signals. If she is matching or initiating flirty/suggestive energy, go bolder; if neutral, keep it playful with a hint of tension; if she is cooling off or deflecting, pull back or advise stopping. Casual = relaxed, natural, low-pressure. Funny = witty banter, light jokes. Motivating = encouraging, supportive, good for friends or someone having a rough day. If two moods are given, blend them.
+RULES: Match her energy, length and style (emoji, punctuation, slang). Never manipulate, pressure, guilt, or deceive. Respect consent: if she is uninterested, says no, or goes cold, tell the user honestly to back off gracefully. No explicit sexual content. If a screenshot is given, read who said what (usually the user is the right-side/colored bubbles, she is the left; say if unclear) and the tone. Be honest about interest level — don't flatter the user. Say when NOT to reply or to stop pursuing, and in that case still give a graceful option if useful.
+Respond ONLY with JSON, no markdown fences.`;
+const SCHEMAS={
+reply:`{"stage":"string","interest":"high|neutral|low","signals":"what she's signaling, 1-2 sentences","heat":"how far to escalate right now: pull back | keep playful | turn it up, plus a few words why","shouldReply":true,"advice":"if shouldReply is false, honest advice, else empty","replies":[{"text":"message to send","why":"short why this works"},{"text":"","why":""},{"text":"","why":""}],"tip":"one tip to improve"}`,
+rate:`{"score":7,"interest":"high|neutral|low","verdict":"1-2 sentences","improvements":["..."],"improved":{"text":"better version","why":"short"},"tip":"one tip"}`,
+opener:`{"vibe":"what you picked up from her profile","replies":[{"text":"opener","why":"short why this works"},{"text":"","why":""},{"text":"","why":""}],"tip":"one tip"}`};
+const MOODS=[["Flirty","😏"],["Spicy","🔥"],["Casual","😌"],["Funny","😂"],["Motivating","💪"]];
+const $=id=>document.getElementById(id);let mode="reply",sel=["Flirty"],img=null,sample=null,busy=false,last=null,n=0;
+const LS={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function chips(){$("chips").innerHTML=MOODS.map(([m,e])=>`<button class="chip${sel.includes(m)?" on":""}" data-m="${m}">${e} ${m}</button>`).join("")}
+$("chips").onclick=e=>{const m=e.target.dataset.m;if(!m)return;if(sel.includes(m)){if(sel.length>1)sel=sel.filter(x=>x!==m)}else{sel.push(m);if(sel.length>2)sel.shift()}chips()};
+const TXT={reply:["Upload chat screenshot","Or type / paste her reply","Get replies","her message…"],rate:["Upload chat screenshot (optional)","Paste your draft reply (and her message for context)","Rate my reply","Your draft…"],opener:["Upload her profile screenshot","Or paste her bio","Generate openers","her bio / prompts…"]};
+function setMode(m){mode=m;document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("on",t.dataset.m===m));const t=TXT[m];$("upLbl").textContent=t[0];$("inLbl").textContent=t[1];$("go").textContent=t[2];$("inp").placeholder=t[3];$("out").innerHTML="";$("err").textContent="";last=null}
+document.querySelector(".tabs").onclick=e=>{if(e.target.dataset.m)setMode(e.target.dataset.m)};
+$("file").onchange=e=>{const f=e.target.files[0];if(!f)return;img=f;$("upTxt").innerHTML=`<img alt="" src="${URL.createObjectURL(f)}"> <b>Screenshot ready</b>`;$("rm").classList.remove("hide")};
+$("rmBtn").onclick=()=>{img=null;$("file").value="";$("upTxt").innerHTML='📷 <b id="upLbl">'+TXT[mode][0]+'</b>';$("rm").classList.add("hide")};
+$("theme").onclick=()=>{const r=document.documentElement,d=getComputedStyle(r).getPropertyValue("--bg").trim()==="#0d0d12";r.dataset.theme=d?"light":"dark"};
+function hist(){const h=LS.get("rizz_h")||[];$("hist").innerHTML=h.length?h.map((x,i)=>`<div class="h"><div><small>${esc(x.mode)} · ${esc(x.mood)} · ${esc(x.when)}</small><br>${esc(x.text)}</div><button class="ib" data-c="${i}">Copy</button></div>`).join(""):'<p class="sub" style="margin:8px 0 0">Nothing yet.</p>'}
+$("hist").onclick=e=>{const i=e.target.dataset.c;if(i!=null)copy((LS.get("rizz_h")||[])[i]?.text,e.target)};
+$("clr").onclick=()=>{LS.set("rizz_h",[]);hist()};
+async function copy(t,b){try{await navigator.clipboard.writeText(t)}catch(e){const a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();try{document.execCommand("copy")}catch(_){}a.remove()}const o=b.textContent;b.textContent="Copied ✓";setTimeout(()=>b.textContent=o,1200)}
+function render(d){
+const pill=i=>`<span class="pill ${i==="high"?"hi":i==="low"?"low":"neutral"}">Interest: ${esc(i||"neutral")}</span>`;
+let h='<div class="card">';
+if(mode==="rate"){h+=`<div class="row"><div><div class="score">${esc(d.score)}/10</div></div>${pill(d.interest)}</div><p>${esc(d.verdict)}</p><ul>${(d.improvements||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`;
+if(d.improved)h+=`<div class="rep"><div class="lbl">Improved version</div><p>${esc(d.improved.text)}</p><p class="why">${esc(d.improved.why)}</p><button class="ib" data-t="${esc(d.improved.text)}">Copy</button></div>`}
+else{if(mode==="reply")h+=`<div class="row">${pill(d.interest)}<span class="why" style="margin:0">${esc(d.stage)}</span></div><p class="tip"><b>She's signaling:</b> ${esc(d.signals)}</p>`+(d.heat?`<p class="tip">🌡️ <b>Heat level:</b> ${esc(d.heat)}</p>`:"")+(d.shouldReply===false?`<div class="warn"><b>Heads up:</b> ${esc(d.advice)}</div>`:"");else h+=`<p class="tip"><b>Vibe:</b> ${esc(d.vibe)}</p>`;
+h+=(d.replies||[]).map(r=>`<div class="rep"><p>${esc(r.text)}</p><p class="why">💡 ${esc(r.why)}</p><button class="ib" data-t="${esc(r.text)}">Copy</button></div>`).join("")}
+h+=`<p class="tip">✨ <b>Tip:</b> ${esc(d.tip)}</p><div style="margin-top:12px"><button class="btn ghost" id="regen">↻ Regenerate</button></div></div>`;
+$("out").innerHTML=h;$("out").scrollIntoView({behavior:"smooth"})}
+$("out").onclick=e=>{if(e.target.dataset.t)copy(e.target.dataset.t,e.target);if(e.target.id==="regen")run(true)};
+async function run(re){
+if(busy)return;$("err").textContent="";
+const txt=$("inp").value.trim();if(!txt&&!img){$("err").textContent="Add a screenshot or some text first.";return}
+if(!sample){$("err").textContent="AI isn't available in this view. Open this page inside Claude to use it.";return}
+busy=true;$("go").disabled=true;$("go").textContent="Thinking…";if(re)$("out").innerHTML='<div class="card sub">Cooking up fresh options…</div>';
+const len=["short (under 15 words)","medium (1-2 sentences)","long (2-4 sentences)"][$("len").value];
+const task={reply:"Suggest 3 reply options to her latest message.",rate:"The user wrote a draft reply. Score it out of 10, explain, list improvements, and give an improved version. Use anything pasted as her message for context.",opener:"Write 3 openers based on her profile/bio. Reference something specific from it."}[mode];
+const prompt=`${SYSTEM}\n\nTASK: ${task}\nMood: ${sel.join(" + ")}\nReply length: ${len}\nExtra context: ${$("ctx").value.trim()||"none"}\n${img?"A screenshot is attached.\n":""}${txt?"Text input:\n"+txt+"\n":""}${re?"Give different options than before. Variation seed "+(++n)+".\n":""}\nReturn JSON exactly in this shape:\n${SCHEMAS[mode]}`;
+try{const d=await sample.json(prompt,{cache:false,...(img?{images:img}:{})});last=d;render(d);
+const first=(d.replies&&d.replies[0]?.text)||d.improved?.text||"";if(first){const h=LS.get("rizz_h")||[];h.unshift({mode,mood:sel.join("+"),text:first,when:new Date().toLocaleDateString()});LS.set("rizz_h",h.slice(0,30));hist()}}
+catch(e){$("out").innerHTML="";$("err").textContent=e&&e.code==="not_granted"?"Permission needed to use the AI. Reload and allow it.":e&&e.code==="rate_limited"?"Slow down a sec — try again shortly.":"Something went wrong. Try again."}
+busy=false;$("go").disabled=false;$("go").textContent=TXT[mode][2]}
+$("go").onclick=()=>run(false);
+const ST={"Cute":["Random, but you just crossed my mind and now I'm smiling at my phone.","Okay, you've officially taken over my playlist. Every song is about you now.","Tell me one thing that made you smile today. I'm collecting.","I like how easy it is to talk to you. Rare find.","Free this weekend? I've got a plan and you're in it.","Not to be dramatic, but my day got better when your name popped up."],
+"Good morning":["Morning you. Fair warning: you were my first thought today.","Coffee's good, but seeing your name pop up is better.","Rise and shine. I'll be the reason you're smiling at your phone.","Good morning. Go be unfairly charming today.","Woke up and you were the first thing on my mind. Annoying how often that's happening.","Hope your day starts as well as mine did, which was reading your last text."],
+"Funny":["I'm making the first move here, so please be impressed.","Serious question, it decides everything: pineapple on pizza, yes or no?","I'd like to formally apply for the position of your favorite text.","Be honest, how long did you stare at my last message before replying?","Are you a blanket hog? I need to know before this goes any further.","Our banter is carrying this whole conversation. I'm just along for the ride."],
+"Playful":["I opened your profile to say hi and forgot every word I know. Hi.","Seeing your name on my screen is officially the best part of my day. No pressure.","I'm roughly 60% sure this text is charming. The other 40% is hoping you laugh anyway.","I told myself I'd play it cool. That lasted about four minutes.","I was going to be productive tonight. Then you texted, and priorities changed.","Texting you was supposed to be a quick check-in. Now it's way past my bedtime.","Rate my flirting out of ten. Be gentle, I'm clearly out of practice.","Trade with me: your most embarrassing text moment for mine. You go first."],
+"Naughty-funny":["I'd say I'm a good influence, but we both know that's not why you're texting me.","I've been behaving all day. You're not making it easy to keep that up.","My plans tonight were innocent until your name showed up.","Careful, keep texting like that and I'll start getting ideas. Good ones.","I'd tell you what I'm thinking, but I'd like to at least buy you a drink first.","Fair warning: I'm a lot more fun in person, and slightly more dangerous."],
+"On their mind":["Saw something today that reminded me of you. Now I have to tell you about it.","I'm supposed to be working. You're not helping.","Something funny happened and I'm saving the story for you.","Dinner this week? I'll pick the place, you pick the vibe.","I've got a free Saturday and a good idea. Interested?","Still thinking about the last time we hung out. Round two soon?"]};
+let sc="Cute";
+function stRender(){$("sc").innerHTML=Object.keys(ST).map(k=>`<button class="chip${k===sc?" on":""}" data-k="${k}">${k}</button>`).join("");$("sl").innerHTML=ST[sc].map(t=>`<div class="h"><div>${esc(t)}</div><button class="ib" data-t="${esc(t)}">Copy</button></div>`).join("")}
+$("sc").onclick=e=>{if(e.target.dataset.k){sc=e.target.dataset.k;stRender()}};
+$("sl").onclick=e=>{if(e.target.dataset.t)copy(e.target.dataset.t,e.target)};
+stRender();chips();hist();
+(async()=>{try{sample=await claude.use("sample");if(sample){const l=await sample.limits().catch(()=>null);if(!l||!l.images){$("upBox").classList.add("hide");$("inLbl").textContent="Paste her reply"}else $("file").accept=l.images.mediaTypes.join(",")}}catch(e){sample=null}})();
+</script></body></html>
+
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RizzByJulius Admin</title>
+<style>:root{--bg:#0d0d12;--card:#17171f;--line:#2a2a36;--tx:#f3f3f7;--mu:#9a9aae;--ac:#ff4d6d}
+@media (prefers-color-scheme:light){:root{--bg:#f6f6f9;--card:#fff;--line:#e2e2ea;--tx:#15151c;--mu:#6b6b7e}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,sans-serif}main{max-width:720px;margin:0 auto;padding:16px}
+h1{margin:0 0 4px}h2{font-size:16px;margin:20px 0 8px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+.r{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}small{color:var(--mu)}
+input,select{width:100%;background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;margin-bottom:8px}
+button{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 14px;cursor:pointer}button.p{background:var(--ac);border:0;color:#fff}button.d{color:#f87171;border-color:#f87171}a{color:var(--ac)}.ok{color:#34d399}.tabs{display:flex;gap:6px;margin-bottom:12px}.tabs a{flex:1;text-align:center;padding:10px;border:1px solid var(--line);border-radius:999px;text-decoration:none;color:var(--tx);background:var(--card)}.tabs a.on{background:var(--ac);color:#fff;border-color:transparent}.hide{display:none!important}.er{color:#f87171}</style></head><body><div style="background:#fbbf24;color:#111;padding:8px 12px;text-align:center;font-size:13px">Preview only: fake data, nothing is saved. Reload to reset.</div><main>
+<div class="tabs"><a class="on" href="#">Admin panel</a><a href="https://claude.ai/artifact/1Y6yFWkSQWhPP8aeAjjVaZ" target="_blank" rel="noopener">Use website</a></div>
+<div class="r"><h1>Admin</h1></div><small id="plan"></small>
+<h2>Dashboard</h2><div class="card" id="dash"></div><div id="expSoon"></div>
+<div class="card"><div class="r"><b id="pendTxt">Payments</b><button id="enableAlerts">Enable alerts</button></div></div>
+<h2>Payment number</h2><form class="card" id="payForm"><input id="payNum" placeholder="Airtel number users pay to" inputmode="tel"><button class="p" type="submit">Save number</button><p id="payMsg" style="margin:8px 0 0"></p><small id="payBy"></small></form>
+<h2>Amount users pay (UGX)</h2><form class="card" id="priceForm"><input id="priceIn" type="number" min="500" inputmode="numeric" placeholder="e.g. 3000"><button class="p" type="submit">Save amount</button><p id="priceMsg" style="margin:8px 0 0"></p></form>
+<h2>WhatsApp contact (shown on the home page)</h2><form class="card" id="waForm"><input id="waIn" placeholder="+256741829090" inputmode="tel"><button class="p" type="submit">Save WhatsApp number</button><p id="waMsg" style="margin:8px 0 0"></p></form>
+<h2>Announcement banner (shown to everyone)</h2><form class="card" id="anForm"><input id="anIn" maxlength="200" placeholder="e.g. New feature today! (leave empty to hide)"><button class="p" type="submit">Post announcement</button><p id="anMsg" style="margin:8px 0 0"></p></form>
+<h2>Add member</h2><form class="card" id="add"><input id="nm" placeholder="Name" autocomplete="off"><input id="ph" placeholder="Phone number used on the website" inputmode="tel"><input id="days" type="number" min="1" max="3650" placeholder="Access days (leave empty for no expiry)"><button class="p" type="submit">Add member</button><p id="msg" style="margin:8px 0 0"></p></form>
+<div id="pend"></div>
+<form class="card hide" id="addAdm"><b>Add admin</b> <small>(owner only)</small><input id="ap" placeholder="Phone number" inputmode="tel"><input id="au" placeholder="Username" autocapitalize="none"><input id="aw" type="text" placeholder="Password (8+ characters)" autocomplete="off"><button class="p" type="submit">Add admin</button><p id="amsg" style="margin:8px 0 0"></p></form>
+<h2>Payments</h2><div id="pay"></div><h2>Users <small id="cnt"></small></h2><input id="q" type="search" placeholder="Search by name or phone number"><div id="usr"></div></main>
+<script>
+(()=>{const N=Date.now(),D=864e5;let id=10;const S={users:[
+{id:1,username:"owner",phone:"0700000001",role:"admin",free_used:0,sub_until:0,created_at:N-30*D},
+{id:2,username:"grace_a",phone:"0700000002",role:"admin",free_used:0,sub_until:0,created_at:N-12*D},
+{id:3,username:"mary_k",phone:"0701234567",role:"user",free_used:10,sub_until:N+3*D,created_at:N-8*D},
+{id:4,username:"brian",phone:"0772000111",role:"user",free_used:4,sub_until:0,created_at:N-2*D}],
+payments:[{id:1,txn:"AM12345678",amount:3000,status:"pending",created_at:N-3600e3,username:"brian"},{id:2,txn:"AM87654321",amount:3000,status:"approved",created_at:N-4*D,username:"mary_k"}]};
+S.pay="0741829090";S.wa="256741829090";S.an="";S.price=3000;S.payBy="owner on 2026-10-03 09:00 UTC";setTimeout(()=>S.payments.unshift({id:3,txn:"AM55512345",amount:3000,status:"pending",created_at:Date.now(),username:"joel_m"}),25000);S.members=[{phone:"0709999999",name:"Sam",days:3650,created_at:N-D}];
+const R=(j,st=200)=>new Response(JSON.stringify(j),{status:st});
+window.fetch=async(u,o={})=>{await new Promise(r=>setTimeout(r,250));const m=o.method||"GET",b=o.body?JSON.parse(o.body):{};let x;
+if(u==="/api/admin/overview")return R({users:[...S.users].reverse(),payments:S.payments,payNumber:S.pay,payBy:S.payBy,members:S.members,plan:{price:S.price,days:7,free:10},whatsapp:S.wa,autoPay:true,stats:{users:S.users.filter(v=>v.role==="user").length,newWeek:2,active:1,freeUsed:14,paidTotal:12000,paidWeek:6000,paidCount:4},expiring:[{username:"mary_k",phone:"0701234567",sub_until:N+2*D}],announcement:S.an,isOwner:true,meId:1,maxAdmins:5});
+if(x=u.match(/payments\/(\d+)\/(approve|reject)/)){const p=S.payments.find(p=>p.id==x[1]);p.status=x[2]==="approve"?"approved":"rejected";if(x[2]==="approve"){const t=S.users.find(v=>v.username===p.username);t.sub_until=Math.max(N,t.sub_until)+7*D}return R({ok:1})}
+if(x=u.match(/users\/(\d+)\/reset/)){return R({ok:1,password:"Tmp"+Math.floor(10000+Math.random()*89999)})}
+if(x=u.match(/users\/(\d+)\/grant/)){const t=S.users.find(v=>v.id==x[1]);t.sub_until=Math.max(N,t.sub_until)+b.days*D;return R({ok:1})}
+if(u==="/api/admin/settings"){if(b.payNumber!==undefined){if(!/^0\d{9}$/.test(b.payNumber))return R({error:"Enter a valid payment phone number, e.g. 0741829090."},400);S.pay=b.payNumber;S.payBy="owner just now"}if(b.price!==undefined){const n=Math.round(+b.price);if(!(n>=500&&n<=1000000))return R({error:"Amount must be between 500 and 1,000,000 UGX."},400);S.price=n}if(b.announcement!==undefined)S.an=String(b.announcement).slice(0,200);if(b.whatsapp!==undefined){const w=String(b.whatsapp).replace(/[\s()-]/g,"").replace(/^\+/,"");if(!/^\d{10,15}$/.test(w))return R({error:"Enter the WhatsApp number with country code, e.g. +256741829090."},400);S.wa=w}return R({ok:1})}
+if(u==="/api/admin/members"&&m==="POST"){if((b.name||"").trim().length<2)return R({error:"Enter the member's name."},400);if(!/^0\d{9}$/.test(b.phone))return R({error:"Enter a valid phone number, e.g. 0701234567."},400);const t=S.users.find(v=>v.phone===b.phone);if(t){t.sub_until=N+(b.days||3650)*D;return R({ok:1,message:"Free access given to "+t.username+"."})}S.members.push({phone:b.phone,name:b.name.trim(),days:b.days||3650,created_at:N});return R({ok:1,message:"Saved. When "+b.name.trim()+" signs up with this number, they get free access automatically."})}
+if((x=u.match(/members\/(.+)$/))&&m==="DELETE"){S.members=S.members.filter(v=>v.phone!==decodeURIComponent(x[1]));return R({ok:1})}
+if(u==="/api/admin/admins"&&m==="POST"){if(!/^[a-z0-9_]{3,20}$/i.test(b.username))return R({error:"Username: 3-20 letters, numbers or underscore."},400);if(!/^0\d{9}$/.test(b.phone))return R({error:"Enter a valid phone number, e.g. 0701234567."},400);if((b.password||"").length<8)return R({error:"Password must be at least 8 characters."},400);
+if(S.users.filter(v=>v.role==="admin").length>=5)return R({error:"Admin limit reached (5)."},400);
+S.users.push({id:id++,username:b.username.toLowerCase(),phone:b.phone,role:"admin",free_used:0,sub_until:b.days?N+b.days*D:0,created_at:N});return R({ok:1})}
+if(x=u.match(/users\/(\d+)$/)){S.users=S.users.filter(v=>v.id!=x[1]);return R({ok:1})}
+return R({error:"Not found"},404)}})();
+</script>
+<script>
+const $=id=>document.getElementById(id),esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const call=(u,m,b)=>fetch(u,{method:m||"GET",headers:{"Content-Type":"application/json"},body:b?JSON.stringify(b):undefined}).then(async r=>({ok:r.ok,status:r.status,j:await r.json().catch(()=>({}))}));
+const d=t=>new Date(t).toLocaleString();let O={},lastPend=null;
+async function load(){const r=await call("/api/admin/overview");if(!r.ok){location.href="/";return}const j=O=r.j;
+const na=j.users.filter(u=>u.role==="admin").length;
+$("payNum").value!==undefined&&document.activeElement!==$("payNum")&&($("payNum").value=j.payNumber||"");$("payBy").textContent=j.payBy?"Last changed by "+j.payBy:"";
+const st=j.stats||{};$("dash").innerHTML=`<div class="r" style="gap:12px"><div><b>${st.users}</b><br><small>users</small></div><div><b>${st.newWeek}</b><br><small>new (7 days)</small></div><div><b>${st.active}</b><br><small>active plans</small></div><div><b>${st.freeUsed}</b><br><small>free uses</small></div></div><hr style="border:0;border-top:1px solid var(--line);margin:10px 0"><div class="r" style="gap:12px"><div><b>${(st.paidTotal||0).toLocaleString()} UGX</b><br><small>collected total</small></div><div><b>${(st.paidWeek||0).toLocaleString()} UGX</b><br><small>last 7 days</small></div><div><b>${st.paidCount}</b><br><small>payments</small></div></div>`;
+$("expSoon").innerHTML=(j.expiring||[]).length?`<h2>Expiring soon</h2>`+j.expiring.map(u=>`<div class="card r"><div><b>${esc(u.username)}</b> · ${esc(u.phone||"")}<br><small>ends ${d(u.sub_until)}</small></div><a href="https://wa.me/256${esc(String(u.phone||"").slice(1))}?text=${encodeURIComponent("Hi "+u.username+", your RizzByJulius access ends soon. Open the app to renew and keep going.")}" target="_blank" rel="noopener">Remind on WhatsApp</a></div>`).join(""):"";
+document.activeElement!==$("anIn")&&($("anIn").value=j.announcement||"");
+document.activeElement!==$("priceIn")&&($("priceIn").value=j.plan.price);document.activeElement!==$("waIn")&&($("waIn").value="+"+(j.whatsapp||""));
+const pend=j.payments.filter(p=>p.status==="pending");$("pendTxt").textContent=pend.length?`🔔 ${pend.length} payment${pend.length>1?"s":""} waiting for approval`:"No payments waiting";document.title=(pend.length?`(${pend.length}) `:"")+"Admin";
+if(lastPend!==null&&pend.length>lastPend)ping("New payment: "+pend[0].username+" · "+pend[0].amount+" UGX");lastPend=pend.length;
+$("plan").textContent=`${j.plan.free} free uses · ${j.plan.price} UGX for ${j.plan.days} days · Admins ${na}/${j.maxAdmins} · In-app mobile money ${j.autoPay?"on":"off"}`;$("cnt").textContent="("+j.users.length+")";
+$("addAdm").classList.toggle("hide",!(j.isOwner&&na<j.maxAdmins));
+$("pend").innerHTML=(j.members||[]).map(m=>`<div class="card r"><div><b>${esc(m.name)}</b> · ${esc(m.phone)}<br><small>Waiting to sign up · ${m.days>=3650?"no expiry":m.days+" days"}</small></div><button class="d" data-m="${esc(m.phone)}">Cancel</button></div>`).join("");
+$("pay").innerHTML=j.payments.map(p=>`<div class="card r"><div><b>${esc(p.username)}</b> · ${esc(p.amount)} UGX<br><small>TXN ${esc(p.txn)} · ${d(p.created_at)} · ${esc(p.status)}</small></div>${p.status==="pending"?`<div><button class="p" data-a="approve" data-i="${p.id}">Approve</button> <button data-a="reject" data-i="${p.id}">Reject</button></div>`:""}</div>`).join("")||"<small>No payments yet.</small>";
+const Q=($("q").value||"").trim().toLowerCase().replace(/\s/g,"");$("usr").innerHTML=j.users.filter(u=>!Q||u.username.toLowerCase().includes(Q)||String(u.phone||"").includes(Q.replace(/^\+?256/,"0"))).map(u=>{const rm=u.id!==j.meId&&(u.role!=="admin"||j.isOwner)&&!(u.role==="admin"&&u.id===1&&false);
+return `<div class="card r"><div><b>${esc(u.username)}</b> · ${esc(u.phone||"")} ${u.role==="admin"?"· admin":""}<br><small>${u.free_used} free used · ${u.sub_until>Date.now()?"active until "+d(u.sub_until):"no active plan"} · joined ${d(u.created_at)}</small></div><div><button data-g="${u.id}">Grant days</button> <button data-r="${u.id}" data-n="${esc(u.username)}">Reset password</button> ${rm?`<button class="d" data-x="${u.id}" data-n="${esc(u.username)}">Remove</button>`:""}</div></div>`}).join("")}
+const flash=(el,r,ok)=>{el.className=r.ok?"ok":"er";el.textContent=r.ok?ok(r.j):(r.j.error||"Something went wrong.")};
+$("add").onsubmit=async e=>{e.preventDefault();const r=await call("/api/admin/members","POST",{name:$("nm").value,phone:$("ph").value,days:+$("days").value||0});flash($("msg"),r,j=>j.message);if(r.ok){$("add").reset();load()}};
+$("addAdm").onsubmit=async e=>{e.preventDefault();const r=await call("/api/admin/admins","POST",{phone:$("ap").value,username:$("au").value,password:$("aw").value});flash($("amsg"),r,()=>"Admin added.");if(r.ok){$("addAdm").reset();load()}};
+$("payForm").onsubmit=async e=>{e.preventDefault();const r=await call("/api/admin/settings","POST",{payNumber:$("payNum").value});flash($("payMsg"),r,()=>"Payment number updated.");if(r.ok)load()};
+$("priceForm").onsubmit=async e=>{e.preventDefault();const r=await call("/api/admin/settings","POST",{price:$("priceIn").value});flash($("priceMsg"),r,()=>"Amount updated. New payments use it.");if(r.ok)load()};
+$("waForm").onsubmit=async e=>{e.preventDefault();const r=await call("/api/admin/settings","POST",{whatsapp:$("waIn").value});flash($("waMsg"),r,()=>"WhatsApp number updated.");if(r.ok)load()};
+$("anForm").onsubmit=async e=>{e.preventDefault();const r=await call("/api/admin/settings","POST",{announcement:$("anIn").value});flash($("anMsg"),r,()=>"Announcement updated.");if(r.ok)load()};
+let T;$("q").oninput=()=>{clearTimeout(T);T=setTimeout(load,250)};
+function ping(t){try{const c=new(window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator();o.connect(c.destination);o.frequency.value=880;o.start();setTimeout(()=>o.stop(),250)}catch(e){}try{if(window.Notification&&Notification.permission==="granted")new Notification("RizzByJulius",{body:t})}catch(e){}}
+$("enableAlerts").onclick=async()=>{try{await Notification.requestPermission();ping("Alerts are on")}catch(e){}};
+setInterval(load,20000);
+document.addEventListener("click",async e=>{const t=e.target;
+if(t.dataset.a){await call(`/api/admin/payments/${t.dataset.i}/${t.dataset.a}`,"POST");load()}
+if(t.dataset.g){const n=prompt("Grant how many days?","7");if(n){await call(`/api/admin/users/${t.dataset.g}/grant`,"POST",{days:+n});load()}}
+if(t.dataset.m){await call("/api/admin/members/"+encodeURIComponent(t.dataset.m),"DELETE");load()}
+if(t.dataset.r&&confirm("Reset password for "+t.dataset.n+"?")){const r=await call("/api/admin/users/"+t.dataset.r+"/reset","POST");alert(r.ok?"Temporary password for "+t.dataset.n+": "+r.j.password+"\n\nSend it to them privately and ask them to change it.":(r.j.error||"Couldn't reset."))}
+if(t.dataset.x&&confirm("Remove "+t.dataset.n+"? This deletes their account and payments.")){const r=await call("/api/admin/users/"+t.dataset.x,"DELETE");if(!r.ok)alert(r.j.error||"Couldn't remove.");load()}});
+load();
+</script></body></html>
